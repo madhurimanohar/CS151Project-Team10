@@ -9,7 +9,10 @@ public class Model {
     public String msg;  // this is for printing any message required on the board
                         // we may or may not need this 
     
-    public char winner;
+    public char winner; // this is the winner of the game
+    
+    public int numOfMovesLeft;  // this determines the number of moves left, used to signify
+                                // when the game ends
     
     /*
      * Constructor initializes board and moveNum
@@ -17,6 +20,7 @@ public class Model {
     public Model() {
         this.board = new char[3][3];
         this.moveNum = 0;   // initialize to 0, create a method that will change the value
+        this.numOfMovesLeft = 9;    // initialize to 9 because game board is 3x3 grid, only 9 possible moves
     }
     
     public char[][] getBoard() {
@@ -35,8 +39,12 @@ public class Model {
         return msg;
     }
     
-    public char getWindder() {
+    public char getWinner() {
         return winner;
+    }
+    
+    public int getNumOfMovesLeft() {
+        return numOfMovesLeft;
     }
     
     public void setBoard(char[][] b) {
@@ -57,6 +65,10 @@ public class Model {
     
     public void setWinner(char w) {
         w = winner;
+    }
+    
+    public void setNumOfMovesLeft(int numOfMovesLeft) {
+        this.numOfMovesLeft = numOfMovesLeft;
     }
     
     /*
@@ -96,7 +108,7 @@ public class Model {
                     if(chooseSymbol() == 'X') {
                         countOfX++;
                     }
-                    else {
+                    else if(chooseSymbol() == 'O') {
                         countOfO++;
                     }
                 }
@@ -128,7 +140,7 @@ public class Model {
                     if(chooseSymbol() == 'X') {
                         countOfX++;
                     }
-                    else {
+                    else if(chooseSymbol() == 'O') {
                         countOfO++;
                     }
                 }
@@ -159,7 +171,7 @@ public class Model {
                 if(chooseSymbol() == 'X') {
                     countOfX++;
                 }
-                else {
+                else if(chooseSymbol() == 'O') {
                     countOfO++;
                 }
             }
@@ -180,9 +192,16 @@ public class Model {
     /*
      * This method sets the board for the game play.
      */
-    public void playGame() {
-        
+    public void playGame(int x, int y) {
+        do {
+            setNumOfMovesLeft(--numOfMovesLeft);
+            
+            if(numOfMovesLeft == 0) {
+                setMSG("Game ended in a tie");
+            }
+            else if(checkForWinner(x, y)) {
+                setMSG(getPlayerSymbol() + "won the game!");
+            }   
+        } while(getNumOfMovesLeft() > 0);
     }
-    
-    
 }
