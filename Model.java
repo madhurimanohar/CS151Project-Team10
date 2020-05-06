@@ -1,4 +1,10 @@
+/**
+ * 
+ * @author madhurim, Gurteg Singh, Rohan Patel
+ *
+ */
 public class Model {
+    
     public char[][] board;  // this represents the board 
     
     public char playerSymbol; // this will be the symbol of the player i.e 'X' or 'O'
@@ -6,21 +12,25 @@ public class Model {
     public int moveNum; // this is to help figure out what the symbol of the player will be,
                         // we can base this off of the move number
     
-    public String msg;  // this is for printing any message required on the board
-                        // we may or may not need this 
-    
     public char winner; // this is the winner of the game
     
-    public int numOfMovesLeft;  // this determines the number of moves left, used to signify
-                                // when the game ends
-    
+    private int size;   // this refers to the size of the boards
+ 
     /*
-     * Constructor initializes board and moveNum
+     * First constructor initializes board and moveNum
      */
     public Model() {
         this.board = new char[3][3];
         this.moveNum = 0;   // initialize to 0, create a method that will change the value
-        this.numOfMovesLeft = 9;    // initialize to 9 because game board is 3x3 grid, only 9 possible moves
+    }
+    
+    /*
+     * Second constructor initializes board size and playerSymbol
+     */
+    public Model(int size) {
+        this.size = size;
+        board = new char[size][size];
+        playerSymbol = 'X';
     }
     
     public char[][] getBoard() {
@@ -35,16 +45,12 @@ public class Model {
         return moveNum;
     }
     
-    public String getMSG() {
-        return msg;
-    }
-    
     public char getWinner() {
         return winner;
     }
     
-    public int getNumOfMovesLeft() {
-        return numOfMovesLeft;
+    public int getSize() {
+        return size;
     }
     
     public void setBoard(char[][] b) {
@@ -59,16 +65,12 @@ public class Model {
         mN = moveNum;
     }
     
-    public void setMSG(String msg) {
-        this.msg = msg;
-    }
-    
     public void setWinner(char w) {
         w = winner;
     }
     
-    public void setNumOfMovesLeft(int numOfMovesLeft) {
-        this.numOfMovesLeft = numOfMovesLeft;
+    public void setSize(int s) {
+        s = size;
     }
     
     /*
@@ -88,8 +90,35 @@ public class Model {
     /*
      * This method is used to determine if there is a winner.
      */
-    public boolean checkForWinner(int x, int y) {
-        if(checkRow(x, y) || checkCol(x, y) || checkDiag(x, y)) {
+    public char findWinner() {
+        if((checkRow() != '\0') || (checkCol() != '\0') || (checkDiagLTR() != '\0') || (checkDiagRTL() != '\0')) {
+            return winner;
+        }
+        return '\0';
+    }
+
+    public boolean tied() {
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (board[r][c] == '\0')
+                    return false;
+            }
+        }
+        return true;
+    }
+    
+    /*
+     * This method checks for a valid move.
+     */
+    public boolean validMove(int r, int c) {
+        if (board[r][c] == '\0') {  // if the spot on the board is null
+            board[r][c] = playerSymbol;
+            if (playerSymbol == 'X') {
+                playerSymbol = 'O';
+            }
+            else {
+                playerSymbol = 'X';
+            }
             return true;
         }
         return false;
@@ -98,110 +127,73 @@ public class Model {
     /*
      * This method checks for the winner in a row.
      */
-    public boolean checkRow(int x, int y) {
-        int countOfX = 0;
-        int countOfO = 0;
-        
-        for(int i = 0; i < board.length; i++) {
-            for(int j = 0; j < board.length; j++) {
-                if((board[i][j]) == (chooseSymbol())) {
-                    if(chooseSymbol() == 'X') {
-                        countOfX++;
-                    }
-                    else if(chooseSymbol() == 'O') {
-                        countOfO++;
-                    }
+    public char checkRow() {
+        char winner;
+        for (int r = 0; r < size; r++) {
+            winner = board[r][0];   // set winner to "this" row and check here
+            for (int c = 0; c < size; c++) {
+                if (board[r][c] != winner) {
+                    winner = '\0';  // this is the char symbol for a null value
+                                    // need to use this instead of 'null' since winner is a char
+                    break;
                 }
             }
+            if (winner != '\0')
+                return winner;
         }
-        
-        if((countOfX == 3)) {
-            winner = 'X';
-            return true;
-        }
-        else if((countOfO) == 3) {
-            winner = 'O';
-            return true;
-        }
-        
-        return false;
+        return '\0';  
     }
     
     /*
      * This method checks for the winner in a column.
      */
-    public boolean checkCol(int x, int y) {
-        int countOfX = 0;
-        int countOfO = 0;
-        
-        for(int i = 0; i < board.length; i++) {
-            for(int j = 0; j < board.length; j++) {
-                if((board[j][i]) == (chooseSymbol())) {
-                    if(chooseSymbol() == 'X') {
-                        countOfX++;
-                    }
-                    else if(chooseSymbol() == 'O') {
-                        countOfO++;
-                    }
+    public char checkCol() {
+        for (int c = 0; c < size; c++) {
+            winner = board[0][c];   // set winner to "this" column and check here
+            for (int r = 0; r < size; r++) {
+                if (board[r][c] != winner) {
+                    winner = '\0';
+                    break;
                 }
             }
+            if (winner != '\0')
+                return winner;
         }
-        
-        if((countOfX == 3)) {
-            winner = 'X';
-            return true;
-        }
-        else if((countOfO) == 3) {
-            winner = 'O';
-            return true;
-        }
-        
-        return false;
+        return '\0';
     }
     
     /*
-     * This method checks for the winner in a diagonal.
+     * This method checks for the winner in a diagonal
+     * starting from left to right.
      */
-    public boolean checkDiag(int x, int y) {
-        int countOfX = 0;
-        int countOfO = 0;
-        
-        for(int i = 0; i < board.length; i++) {
-            if((board[i][i]) == (chooseSymbol())) {
-                if(chooseSymbol() == 'X') {
-                    countOfX++;
-                }
-                else if(chooseSymbol() == 'O') {
-                    countOfO++;
-                }
+    public char checkDiagLTR() {
+        winner = board[0][0];   // set winner as left most point and start checking from here
+        for (int r = 0; r < size; r++) {
+            if (board[r][r] != winner) {
+                winner = '\0';
+                break;
             }
         }
-        
-        if((countOfX == 3)) {
-            winner = 'X';
-            return true;
-        }
-        else if((countOfO) == 3) {
-            winner = 'O';
-            return true;
-        }
-        
-        return false;
+        if (winner != '\0')
+            return winner;
+        return '\0';
     }
     
     /*
-     * This method sets the board for the game play.
+     * This method checks for the winner in a diagonal
+     * starting from right to left.
      */
-    public void playGame(int x, int y) {
-        do {
-            setNumOfMovesLeft(--numOfMovesLeft);
-            
-            if(numOfMovesLeft == 0) {
-                setMSG("Game ended in a tie");
+    public char checkDiagRTL() {
+        winner = board[0][board.length - 1];    // set winner as right most point of the board and start checking from here
+        for (int r = 0; r < size; r++) {
+            if (board[r][(board.length - 1) - r] != winner) {
+                winner = '\0';
+                break;
             }
-            else if(checkForWinner(x, y)) {
-                setMSG(getPlayerSymbol() + "won the game!");
-            }   
-        } while(getNumOfMovesLeft() > 0);
+        }
+        if (winner != '\0')
+            return winner;
+
+        return '\0';
     }
 }
