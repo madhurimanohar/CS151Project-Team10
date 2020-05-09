@@ -15,13 +15,25 @@ public class View extends JFrame {
 
     private JButton board[][] = new JButton[3][3];
     private int size;
+    private UILook uiLook;
+    private JButton btnUndo;
 
     /*
      * Constructor
      */
-    public View() {
+    public View(UILook uiLook) {
+    	this.uiLook = uiLook;
+    	
+    	// undo panel
+    	JPanel pnlBottom = new JPanel();
+    	btnUndo = new JButton("Undo");
+    	pnlBottom.add(btnUndo);
+    	add(pnlBottom, BorderLayout.SOUTH);
+    	
         this.setTitle("Let's Play TicTacToe!");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+
     }
 
     /*
@@ -41,9 +53,13 @@ public class View extends JFrame {
                 board[r][c].putClientProperty("row", r);
                 board[r][c].putClientProperty("col", c);
                 board[r][c].setText("");
+                uiLook.formatSquare(board[r][c]);
                 grid.add(board[r][c]);
             } 
         }
+        
+        
+        this.setLocationRelativeTo(null);
         this.setVisible(true); 
     }
 
@@ -54,6 +70,12 @@ public class View extends JFrame {
         createBoard(3);
         return size; 
     }
+    
+    
+    public JButton[][] getBoard() {
+		return board;
+	}
+    
 
     /*
      * ActionListener for all buttons.
@@ -63,6 +85,18 @@ public class View extends JFrame {
             for (int c = 0; c < size; c++)
                 board[r][c].addActionListener(listener);
         }
+    }
+    
+    
+    public void undoUpdate(boolean enable) {
+    	btnUndo.setEnabled(enable);
+    }
+    
+    /*
+     * ActionListener for Undo button.
+     */
+    public void addUndoButtonListener(ActionListener listener) {
+        btnUndo.addActionListener(listener);
     }
 
     /*

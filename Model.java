@@ -6,22 +6,21 @@
 public class Model {
     
     public char[][] board;  // this represents the board 
-    
     public char playerSymbol; // this will be the symbol of the player i.e 'X' or 'O'
-    
-    public int moveNum; // this is to help figure out what the symbol of the player will be,
-                        // we can base this off of the move number
-    
-    public char winner; // this is the winner of the game
-    
+    public char winner; // this is the winner of the game   
     private int size;   // this refers to the size of the boards
  
+    
+    private int lastR = -1, lastC = -1; // last movew row and coloumn
+    private int undos = 0; // total undos done in one turn
+    private char lastPlayer; // last player who played the turn
+    
+    
     /*
      * First constructor initializes board and moveNum
      */
     public Model() {
         this.board = new char[3][3];
-        this.moveNum = 0;   // initialize to 0, create a method that will change the value
     }
     
     /*
@@ -41,9 +40,6 @@ public class Model {
         return playerSymbol;
     }
     
-    public int getMoveNum() {
-        return moveNum;
-    }
     
     public char getWinner() {
         return winner;
@@ -61,9 +57,7 @@ public class Model {
         pS = playerSymbol;
     }
     
-    public void setMoveNum(int mN) {
-        mN = moveNum;
-    }
+   
     
     public void setWinner(char w) {
         w = winner;
@@ -73,19 +67,7 @@ public class Model {
         s = size;
     }
     
-    /*
-     * This method is the basis off of which the player's 
-     * symbol gets chosen.
-     */
-    public char chooseSymbol() {
-        if(moveNum % 2 == 0) {
-            playerSymbol = 'X';
-        }
-        else {
-            playerSymbol = 'O';
-        }
-        return playerSymbol;
-    }
+    
     
     /*
      * This method is used to determine if there is a winner.
@@ -112,23 +94,59 @@ public class Model {
      */
     public boolean validMove(int r, int c) {
         if (board[r][c] == '\0') {  // if the spot on the board is null
+            
+            // if new player has player, reset undo count
+            if(lastPlayer != playerSymbol) {
+                undos = 0;
+            }
+            
             board[r][c] = playerSymbol;
-            if (playerSymbol == 'X') {
-                playerSymbol = 'O';
-            }
-            else {
-                playerSymbol = 'X';
-            }
+            
+            
+            // update last move stats
+            lastR = r;
+            lastC = c;
+            lastPlayer = playerSymbol;
+            
+            // switch player
+            switchPlayer();
+            
             return true;
         }
         return false;
+    }
+    
+    // check if undo can be done
+    public boolean canUndo() {
+        return lastR != -1 && lastC != -1 && undos < 3 && winner == '\0';
+    }
+    
+    
+    
+    // perform undo
+    public void undo() {
+        if(canUndo()) { 
+            playerSymbol = lastPlayer; // update current player
+            board[lastR][lastC] = '\0'; // clear move
+            lastR = lastC = -1;
+            undos++;
+        }
+    }
+    
+    
+    private void switchPlayer() {
+        if (playerSymbol == 'X') {
+            playerSymbol = 'O';
+        }
+        else {
+            playerSymbol = 'X';
+        }
     }
     
     /*
      * This method checks for the winner in a row.
      */
     public char checkRow() {
-        char winner;
         for (int r = 0; r < size; r++) {
             winner = board[r][0];   // set winner to "this" row and check here
             for (int c = 0; c < size; c++) {
