@@ -9,18 +9,17 @@ import javax.swing.JButton;
  */
 public class Controller {
 
-	private Model theModel;
-	private View theView;
+	private Model model;
+	private View view;
 
-	public Controller(Model theModel, View theView) {
-		this.theView = theView;
-		this.theModel = theModel;
-		theView.addButtonListener(new XOListener());
-		theView.addUndoButtonListener(new UndoListener());
-		theView.undoUpdate(theModel.canUndo());
+	public Controller(Model model, View view) {
+		this.view = view;
+		this.model = model;
+		view.addButtonListener(new XOListener());
+		view.addUndoButtonListener(new UndoListener());
+		view.undoUpdate(model.canUndo());
 	}
 
-	
 	// XO Listener for the square buttons
 	class XOListener implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
@@ -30,24 +29,24 @@ public class Controller {
 			int c;
 			char winner;
 
-			playerSymbol = theModel.getPlayerSymbol(); // get the playerSymbol from Model class
+			playerSymbol = model.getPlayerSymbol(); // get the playerSymbol from Model class
 			r = (int) btn.getClientProperty("row");
 			c = (int) btn.getClientProperty("col");
 
-			if (theModel.validMove(r, c)) { // checks for a valid move by the player
-				theView.setButtonText(r, c, playerSymbol);
+			if (model.validMove(r, c)) { // checks for a valid move by the player
+				view.setButtonText(r, c, playerSymbol);
 
-				winner = theModel.findWinner();
+				winner = model.checkForWinner();
 				if ((winner == 'X') || (winner == 'O')) { // if the symbol of the winner is either X or O
 					disableButtons(); // disable all buttons
-					theView.displayMessage(winner + " has won the game!");
+					view.displayMessage(winner + " has won the game!");
 
-				} else if (theModel.tied()) { // else it's a tie
+				} else if (model.tied()) { // else it's a tie
 					disableButtons(); // disable all buttons
-					theView.displayMessage("You both tied! Replay!");
+					view.displayMessage("You both tied! Replay!");
 				}
 
-				theView.undoUpdate(theModel.canUndo());
+				view.undoUpdate(model.canUndo());
 			}
 
 		}
@@ -57,17 +56,17 @@ public class Controller {
 	// listener for undo
 	class UndoListener implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
-			theModel.undo(); // perform undo
+			model.undo(); // perform undo
 			
 			// check if undo can be done
-			theView.undoUpdate(theModel.canUndo());
+			view.undoUpdate(model.canUndo());
 			
 			
 			// refresh to original state of model
-			JButton[][] board = theView.getBoard();
+			JButton[][] board = view.getBoard();
 			for (int i = 0; i < board.length; i++) {
 				for (int j = 0; j < board[i].length; j++) {
-					board[i][j].setText(theModel.getBoard()[i][j] + "");
+					board[i][j].setText(model.getBoard()[i][j] + "");
 				}
 			}
 		}
@@ -75,14 +74,14 @@ public class Controller {
 
 	// disable all buttons in the UI as game is over
 	void disableButtons() {
-		JButton[][] board = theView.getBoard();
+		JButton[][] board = view.getBoard();
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
 				board[i][j].setEnabled(false);
 			}
 		}
 
-		theView.undoUpdate(false);
+		view.undoUpdate(false);
 	}
 
 }

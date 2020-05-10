@@ -72,7 +72,7 @@ public class Model {
     /*
      * This method is used to determine if there is a winner.
      */
-    public char findWinner() {
+    public char checkForWinner() {
         if((checkRow() != '\0') || (checkCol() != '\0') || (checkDiagLTR() != '\0') || (checkDiagRTL() != '\0')) {
             return winner;
         }
